@@ -1,6 +1,5 @@
 VERSION := $(shell grep . VERSION.txt | cut -f1 -d:)
-PROGRAM_NAME1:= biorobots
-PROGRAM_NAME2:= celltypes3
+PROGRAM_NAME:= myproj
 
 osRelease = $(shell lsb_release -r | sed -e "s/Release:\W*//" -e "s/\..*//")
 ifeq ($(osRelease),7)
@@ -82,26 +81,21 @@ PhysiCell_core_OBJECTS := PhysiCell_phenotype.o PhysiCell_cell_container.o Physi
 PhysiCell_cell.o PhysiCell_custom.o PhysiCell_utilities.o PhysiCell_constants.o PhysiCell_basic_signaling.o
 
 PhysiCell_module_OBJECTS := PhysiCell_SVG.o PhysiCell_pathology.o PhysiCell_MultiCellDS.o PhysiCell_various_outputs.o \
-PhysiCell_pugixml.o PhysiCell_settings.o PhysiCell_geometry.o
+PhysiCell_pugixml.o PhysiCell_settings.o PhysiCell_geometry.o 
 
 # put your custom objects here (they should be in the custom_modules directory)
 
-biorobots_custom_module_OBJECTS := custom_biorobots.o 
-celltypes3_custom_module_OBJECTS := custom_celltypes3.o 
+custom_module_OBJECTS := custom.o  mechanics.o
 
 pugixml_OBJECTS := pugixml.o
 
 PhysiCell_OBJECTS := $(BioFVM_OBJECTS)  $(pugixml_OBJECTS) $(PhysiCell_core_OBJECTS) $(PhysiCell_module_OBJECTS)
-#ALL_OBJECTS1 := $(PhysiCell_OBJECTS) $(biorobots_custom_module_OBJECTS)
-#ALL_OBJECTS2 := $(PhysiCell_OBJECTS) $(celltypes3_custom_module_OBJECTS)
-ALL_OBJECTS1 := $(PhysiCell_OBJECTS) biorobots.o
-ALL_OBJECTS2 := $(PhysiCell_OBJECTS) celltypes3.o
+ALL_OBJECTS := $(PhysiCell_OBJECTS) $(custom_module_OBJECTS)
 
 # compile the project 
 
-all: main-biorobots.cpp $(ALL_OBJECTS1) $(ALL_OBJECTS2)
-	$(COMPILE_COMMAND) -o $(PROGRAM_NAME1) $(ALL_OBJECTS1) main-biorobots.cpp 
-	$(COMPILE_COMMAND) -o $(PROGRAM_NAME2) $(ALL_OBJECTS2) main-celltypes3.cpp 
+all: main.cpp $(ALL_OBJECTS)
+	$(COMPILE_COMMAND) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp 
 
 # PhysiCell core components	
 
@@ -186,31 +180,27 @@ PhysiCell_basic_signaling.o: ./core/PhysiCell_basic_signaling.cpp
 	
 PhysiCell_geometry.o: ./modules/PhysiCell_geometry.cpp
 	$(COMPILE_COMMAND) -c ./modules/PhysiCell_geometry.cpp 
-	
+
 # user-defined PhysiCell modules
 
-biorobots.o: ./custom_modules/biorobots.cpp 
-	$(COMPILE_COMMAND) -c ./custom_modules/biorobots.cpp
-celltypes3.o: ./custom_modules/celltypes3.cpp 
-	$(COMPILE_COMMAND) -c ./custom_modules/celltypes3.cpp
-
+custom.o: ./custom_modules/custom.cpp 
+	$(COMPILE_COMMAND) -c ./custom_modules/custom.cpp
+mechanics.o: ./custom_modules/mechanics.cpp 
+	$(COMPILE_COMMAND) -c ./custom_modules/mechanics.cpp
 	
 # next 2 targets for nanoHUB
 install: 
 	$(MODINIT); $(MODCMD); make all
-	install --mode 0755 -D $(PROGRAM_NAME1) $(BIN)/$(PROGRAM_NAME1)
-	install --mode 0755 -D $(PROGRAM_NAME2) $(BIN)/$(PROGRAM_NAME2)
+	install --mode 0755 -D $(PROGRAM_NAME) $(BIN)/$(PROGRAM_NAME)
 
 distclean: clean
-	rm -f $(BIN)/$(PROGRAM_NAME1)
-	rm -f $(BIN)/$(PROGRAM_NAME2)
+	rm -f $(BIN)/$(PROGRAM_NAME)
 	rm -rf $(BIN)/__pycache__
 	rm -rf ../.ipynb_checkpoints
 
 clean:
 	rm -f *.o
-	rm -f $(PROGRAM_NAME1)
-	rm -f $(PROGRAM_NAME2)
+	rm -f $(PROGRAM_NAME)
 	
 data-cleanup:
 	rm -rf ./output
