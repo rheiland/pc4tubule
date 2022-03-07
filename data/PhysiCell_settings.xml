@@ -45,13 +45,10 @@
 		<virtual_wall_at_domain_edge>true</virtual_wall_at_domain_edge>
 	</options>
 	<microenvironment_setup>
-		<variable
-			name="oxygen"
-			units="dimensionless"
-			ID="0">
+		<variable name="oxygen" units="dimensionless" ID="0">
 			<physical_parameter_set>
-            <!-- <diffusion_coefficient units="micron^2/min">100000.0</diffusion_coefficient> -->
 				<decay_rate units="1/min">10</decay_rate>
+                <diffusion_coefficient units="micron^2/min">100000</diffusion_coefficient>
 			</physical_parameter_set>
 			<initial_condition
 				units="mmHg">38</initial_condition>
