@@ -369,6 +369,8 @@ class Vis(QWidget):
         self.reset_model()
 
     def reset_model(self):
+        return
+    def reset_model0(self):
         print("\n--------- vis_tab: reset_model ----------")
         # Verify initial.xml and at least one .svg file exist. Obtain bounds from initial.xml
         # tree = ET.parse(self.output_dir + "/" + "initial.xml")
