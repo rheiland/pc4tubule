@@ -870,11 +870,14 @@ class Vis(QWidget):
 
         # # renderer.AddActor(actor)
         #------------------------------------------
+        xmax = 400
+        ymax = 400
+        zmax = 150
         cyl = vtkCylinderSource()
         cyl.CappingOff()
-        cyl.SetCenter(485.0, 0.0, 0.0)
-        cyl.SetRadius(300.0)
-        cyl.SetHeight(950.0)
+        cyl.SetCenter(0.0, 0.0, 300.0)
+        cyl.SetRadius(xmax)
+        cyl.SetHeight(800.0)
         cyl.SetResolution(50)
 
         cyl_mapper = vtkPolyDataMapper()
@@ -886,7 +889,21 @@ class Vis(QWidget):
         self.cyl_actor.GetProperty().SetAmbient(1.0)
         self.cyl_actor.GetProperty().SetRepresentationToWireframe()
 
+        #--------
+        box_outline = vtkOutlineSource()
+        bds = [-xmax,xmax, -ymax,ymax, -zmax,zmax]    # {xmin,xmax,ymin,ymax,zmin,zmax} via SetBounds()
+        box_outline.SetBounds(bds)
+
+        box_mapper = vtkPolyDataMapper()
+        box_mapper.SetInputConnection(box_outline.GetOutputPort())
+
+        box_actor = vtkActor()
+        box_actor.SetMapper(box_mapper)
+        box_actor.GetProperty().SetColor(1.0, 1.0, 1.0)
+
+        #--------
         self.ren.AddActor(self.cyl_actor)
+        self.ren.AddActor(box_actor)
         # self.ren.AddActor(self.actor)
         # renderer.SetBackground(colors.GetColor3d('SlateGray'))  # Background Slate Gray
 
