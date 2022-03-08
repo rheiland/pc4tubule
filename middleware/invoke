@@ -1,3 +1,6 @@
 #!/bin/sh
 
-/usr/bin/invoke_app "$@" -C "python @tool/bin/studio.py" -t pc4tubule -u anaconda3-5.1
+/usr/bin/invoke_app "$@" -t pc4tubule \
+                         -C "python @tool/bin/studio.py" \
+                         -u vtk-8.2.0 \
+                         -u pyqt5-5.10.1 
