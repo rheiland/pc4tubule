@@ -77,9 +77,9 @@ class RunModel(QWidget):
         hbox.addWidget(QLabel("Exec:"))
         self.exec_name = QLineEdit()
         if self.nanohub_flag:
-            self.exec_name.setText('cancer_immune_3D')
+            self.exec_name.setText('myproj')
         else:
-            self.exec_name.setText('../cancer_immune_3D')
+            self.exec_name.setText('../myproj')
         # self.exec_name.setEnabled(False)
         hbox.addWidget(self.exec_name)
 
