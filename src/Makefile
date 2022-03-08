@@ -18,10 +18,6 @@ else ifeq ($(hostName),nanohub10)
 	BIN = ../bin
 	MODINIT = true
 	MODCMD = true
-else ifeq ($(hostName),rice7)
-	BIN = ../bin/rice7
-	MODINIT = . $(MODULESHOME)/init/sh
-	MODCMD = module purge 2> /dev/null; module load gcc/7.3.0
 else ifeq ($(hostName),brown7)
 	BIN = ../bin/brown7
 	MODINIT = . $(MODULESHOME)/init/sh
