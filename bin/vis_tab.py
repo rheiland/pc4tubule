@@ -369,6 +369,8 @@ class Vis(QWidget):
         self.reset_model()
 
     def reset_model(self):
+        return
+    def reset_model0(self):
         print("\n--------- vis_tab: reset_model ----------")
         # Verify initial.xml and at least one .svg file exist. Obtain bounds from initial.xml
         # tree = ET.parse(self.output_dir + "/" + "initial.xml")
@@ -727,146 +729,146 @@ class Vis(QWidget):
     #------------------------------------------------------------
     # def plot_svg(self, frame, rdel=''):
     def plot_cells3D(self, frame):
-        print("plot_cells3D:  self.output_dir= ",self.output_dir)
-        print("plot_cells3D:  frame= ",frame)
-        # xml_file = Path(self.output_dir, "output00000000.xml")
-        # xml_file = "output00000000.xml"
-        xml_file = "output%08d.xml" % frame
-        print("plot_cells3D: xml_file = ",xml_file)
-        # mcds = pyMCDS_cells(xml_file, '.')  
-        mcds = pyMCDS_cells(xml_file, 'tmpdir')  
-        print('time=', mcds.get_time())
+        # print("plot_cells3D:  self.output_dir= ",self.output_dir)
+        # print("plot_cells3D:  frame= ",frame)
+        # # xml_file = Path(self.output_dir, "output00000000.xml")
+        # # xml_file = "output00000000.xml"
+        # xml_file = "output%08d.xml" % frame
+        # print("plot_cells3D: xml_file = ",xml_file)
+        # # mcds = pyMCDS_cells(xml_file, '.')  
+        # mcds = pyMCDS_cells(xml_file, 'tmpdir')  
+        # print('time=', mcds.get_time())
 
-        print(mcds.data['discrete_cells'].keys())
+        # print(mcds.data['discrete_cells'].keys())
 
-        ncells = len(mcds.data['discrete_cells']['ID'])
-        print('ncells=', ncells)
+        # ncells = len(mcds.data['discrete_cells']['ID'])
+        # print('ncells=', ncells)
 
-        # global xyz
-        xyz = np.zeros((ncells, 3))
-        xyz[:, 0] = mcds.data['discrete_cells']['position_x']
-        xyz[:, 1] = mcds.data['discrete_cells']['position_y']
-        xyz[:, 2] = mcds.data['discrete_cells']['position_z']
-        #xyz = xyz[:1000]
-        # print("position_x = ",xyz[:,0])
-        xmin = min(xyz[:,0])
-        xmax = max(xyz[:,0])
-        print("xmin = ",xmin)
-        print("xmax = ",xmax)
+        # # global xyz
+        # xyz = np.zeros((ncells, 3))
+        # xyz[:, 0] = mcds.data['discrete_cells']['position_x']
+        # xyz[:, 1] = mcds.data['discrete_cells']['position_y']
+        # xyz[:, 2] = mcds.data['discrete_cells']['position_z']
+        # #xyz = xyz[:1000]
+        # # print("position_x = ",xyz[:,0])
+        # xmin = min(xyz[:,0])
+        # xmax = max(xyz[:,0])
+        # print("xmin = ",xmin)
+        # print("xmax = ",xmax)
 
-        ymin = min(xyz[:,1])
-        ymax = max(xyz[:,1])
-        print("ymin = ",ymin)
-        print("ymax = ",ymax)
+        # ymin = min(xyz[:,1])
+        # ymax = max(xyz[:,1])
+        # print("ymin = ",ymin)
+        # print("ymax = ",ymax)
 
-        zmin = min(xyz[:,2])
-        zmax = max(xyz[:,2])
-        print("zmin = ",zmin)
-        print("zmax = ",zmax)
+        # zmin = min(xyz[:,2])
+        # zmax = max(xyz[:,2])
+        # print("zmin = ",zmin)
+        # print("zmax = ",zmax)
 
-        cell_type = mcds.data['discrete_cells']['cell_type']
-        # print(type(cell_type))
-        # print(cell_type)
-        unique_cell_type = np.unique(cell_type)
-        print("\nunique_cell_type = ",unique_cell_type )
+        # cell_type = mcds.data['discrete_cells']['cell_type']
+        # # print(type(cell_type))
+        # # print(cell_type)
+        # unique_cell_type = np.unique(cell_type)
+        # print("\nunique_cell_type = ",unique_cell_type )
 
-        #------------
-        # colors = vtkNamedColors()
+        # #------------
+        # # colors = vtkNamedColors()
 
-        self.points = vtkPoints()
-        self.points.Reset()
-        self.cellID = vtkFloatArray()
-        self.cellID.Reset()
-        self.cellVolume = vtkFloatArray()
-        self.cellVolume.Reset()
-        for idx in range(ncells):
-            x= mcds.data['discrete_cells']['position_x'][idx]
-            y= mcds.data['discrete_cells']['position_y'][idx]
-            z= mcds.data['discrete_cells']['position_z'][idx]
-            id = mcds.data['discrete_cells']['cell_type'][idx]
-            self.points.InsertNextPoint(x, y, z)
-            # cellVolume.InsertNextValue(30.0)
-            self.cellID.InsertNextValue(id)
-
-        self.polydata = vtkPolyData()
-        self.polydata.SetPoints(self.points)
-        # polydata.GetPointData().SetScalars(cellVolume)
-        self.polydata.GetPointData().SetScalars(self.cellID)
-
-        cellID_color_dict = {}
+        # self.points = vtkPoints()
+        # self.points.Reset()
+        # self.cellID = vtkFloatArray()
+        # self.cellID.Reset()
+        # self.cellVolume = vtkFloatArray()
+        # self.cellVolume.Reset()
         # for idx in range(ncells):
-        random.seed(42)
-        for utype in unique_cell_type:
-            # colors.InsertTuple3(0, randint(0,255), randint(0,255), randint(0,255)) # reddish
-            cellID_color_dict[utype] = [random.randint(0,255), random.randint(0,255), random.randint(0,255)]
-        # cellID_color_dict[0.0]=[255,255,0]  # yellow basement membrane
-        cellID_color_dict[1.]=[255,255,0]  # yellow basement membrane
-        print("color dict=",cellID_color_dict)
+        #     x= mcds.data['discrete_cells']['position_x'][idx]
+        #     y= mcds.data['discrete_cells']['position_y'][idx]
+        #     z= mcds.data['discrete_cells']['position_z'][idx]
+        #     id = mcds.data['discrete_cells']['cell_type'][idx]
+        #     self.points.InsertNextPoint(x, y, z)
+        #     # cellVolume.InsertNextValue(30.0)
+        #     self.cellID.InsertNextValue(id)
 
-        self.colors = vtkUnsignedCharArray()
-        self.colors.Reset()
-        self.colors.SetNumberOfComponents(3)
-        self.colors.SetNumberOfTuples(self.polydata.GetNumberOfPoints())  # ncells
-        for idx in range(ncells):
-        # for idx in range(len(unique_cell_type)):
-            # colors.InsertTuple3(idx, randint(0,255), randint(0,255), randint(0,255)) 
-            # if idx < 5:
-                # print(idx,cellID_color_dict[cell_type[idx]])
-            self.colors.InsertTuple3(idx, cellID_color_dict[cell_type[idx]][0], cellID_color_dict[cell_type[idx]][1], cellID_color_dict[cell_type[idx]][2])
+        # self.polydata = vtkPolyData()
+        # self.polydata.SetPoints(self.points)
+        # # polydata.GetPointData().SetScalars(cellVolume)
+        # self.polydata.GetPointData().SetScalars(self.cellID)
 
-        self.polydata.GetPointData().SetScalars(self.colors)
+        # cellID_color_dict = {}
+        # # for idx in range(ncells):
+        # random.seed(42)
+        # for utype in unique_cell_type:
+        #     # colors.InsertTuple3(0, randint(0,255), randint(0,255), randint(0,255)) # reddish
+        #     cellID_color_dict[utype] = [random.randint(0,255), random.randint(0,255), random.randint(0,255)]
+        # # cellID_color_dict[0.0]=[255,255,0]  # yellow basement membrane
+        # cellID_color_dict[1.]=[255,255,0]  # yellow basement membrane
+        # print("color dict=",cellID_color_dict)
 
-        self.sphereSource = vtkSphereSource()
-        nres = 20
-        self.sphereSource.SetPhiResolution(nres)
-        self.sphereSource.SetThetaResolution(nres)
-        self.sphereSource.SetRadius(0.1)
+        # self.colors = vtkUnsignedCharArray()
+        # self.colors.Reset()
+        # self.colors.SetNumberOfComponents(3)
+        # self.colors.SetNumberOfTuples(self.polydata.GetNumberOfPoints())  # ncells
+        # for idx in range(ncells):
+        # # for idx in range(len(unique_cell_type)):
+        #     # colors.InsertTuple3(idx, randint(0,255), randint(0,255), randint(0,255)) 
+        #     # if idx < 5:
+        #         # print(idx,cellID_color_dict[cell_type[idx]])
+        #     self.colors.InsertTuple3(idx, cellID_color_dict[cell_type[idx]][0], cellID_color_dict[cell_type[idx]][1], cellID_color_dict[cell_type[idx]][2])
 
-        self.glyph = vtkGlyph3D()
-        self.glyph.SetSourceConnection(self.sphereSource.GetOutputPort())
-        self.glyph.SetInputData(self.polydata)
-        self.glyph.SetColorModeToColorByScalar()
-        # glyph.SetScaleModeToScaleByScalar()
+        # self.polydata.GetPointData().SetScalars(self.colors)
 
-        # using these 2 results in fixed size spheres
-        self.glyph.SetScaleModeToDataScalingOff()  # results in super tiny spheres without 'ScaleFactor'
-        self.glyph.SetScaleFactor(170)  # overall (multiplicative) scaling factor
+        # self.sphereSource = vtkSphereSource()
+        # nres = 20
+        # self.sphereSource.SetPhiResolution(nres)
+        # self.sphereSource.SetThetaResolution(nres)
+        # self.sphereSource.SetRadius(0.1)
 
-        # glyph.SetScaleModeToDataScalingOn()
-        # glyph.ScalingOn()
-        self.glyph.Update()
+        # self.glyph = vtkGlyph3D()
+        # self.glyph.SetSourceConnection(self.sphereSource.GetOutputPort())
+        # self.glyph.SetInputData(self.polydata)
+        # self.glyph.SetColorModeToColorByScalar()
+        # # glyph.SetScaleModeToScaleByScalar()
 
-        # Visualize
-        self.mapper = vtkPolyDataMapper()
-        self.mapper.SetInputConnection(self.glyph.GetOutputPort())
+        # # using these 2 results in fixed size spheres
+        # self.glyph.SetScaleModeToDataScalingOff()  # results in super tiny spheres without 'ScaleFactor'
+        # self.glyph.SetScaleFactor(170)  # overall (multiplicative) scaling factor
 
-        self.actor = vtkActor()
-        self.actor.SetMapper(self.mapper)
-        # actor.GetProperty().SetInterpolationToPBR()
-        # actor.GetProperty().SetColor(colors.GetColor3d('Salmon'))
-        # print("-- actor defaults:")
-        # print("-- diffuse:",self.actor.GetProperty().GetDiffuse())  # 1.0
-        # print("-- specular:",self.actor.GetProperty().GetSpecular())  # 0.0
-        # print("-- roughness:",self.actor.GetProperty().GetCoatRoughness ())  # 0.0
-        self.actor.GetProperty().SetAmbient(0.3)
-        self.actor.GetProperty().SetDiffuse(0.5)
-        self.actor.GetProperty().SetSpecular(0.2)
-        # actor.GetProperty().SetCoatRoughness (0.5)
-        # actor.GetProperty().SetCoatRoughness (0.2)
-        # actor.GetProperty().SetCoatRoughness (1.0)
+        # # glyph.SetScaleModeToDataScalingOn()
+        # # glyph.ScalingOn()
+        # self.glyph.Update()
 
-        # renderer = vtkRenderer()
-        # amval = 1.0  # default
-        # renderer.SetAmbient(amval, amval, amval)
+        # # Visualize
+        # self.mapper = vtkPolyDataMapper()
+        # self.mapper.SetInputConnection(self.glyph.GetOutputPort())
 
-        # renderWindow = vtkRenderWindow()
-        # renderWindow.SetPosition(100,100)
-        # renderWindow.SetSize(1400,1200)
-        # renderWindow.AddRenderer(renderer)
-        # renderWindowInteractor = vtkRenderWindowInteractor()
-        # renderWindowInteractor.SetRenderWindow(renderWindow)
+        # self.actor = vtkActor()
+        # self.actor.SetMapper(self.mapper)
+        # # actor.GetProperty().SetInterpolationToPBR()
+        # # actor.GetProperty().SetColor(colors.GetColor3d('Salmon'))
+        # # print("-- actor defaults:")
+        # # print("-- diffuse:",self.actor.GetProperty().GetDiffuse())  # 1.0
+        # # print("-- specular:",self.actor.GetProperty().GetSpecular())  # 0.0
+        # # print("-- roughness:",self.actor.GetProperty().GetCoatRoughness ())  # 0.0
+        # self.actor.GetProperty().SetAmbient(0.3)
+        # self.actor.GetProperty().SetDiffuse(0.5)
+        # self.actor.GetProperty().SetSpecular(0.2)
+        # # actor.GetProperty().SetCoatRoughness (0.5)
+        # # actor.GetProperty().SetCoatRoughness (0.2)
+        # # actor.GetProperty().SetCoatRoughness (1.0)
 
-        # renderer.AddActor(actor)
+        # # renderer = vtkRenderer()
+        # # amval = 1.0  # default
+        # # renderer.SetAmbient(amval, amval, amval)
+
+        # # renderWindow = vtkRenderWindow()
+        # # renderWindow.SetPosition(100,100)
+        # # renderWindow.SetSize(1400,1200)
+        # # renderWindow.AddRenderer(renderer)
+        # # renderWindowInteractor = vtkRenderWindowInteractor()
+        # # renderWindowInteractor.SetRenderWindow(renderWindow)
+
+        # # renderer.AddActor(actor)
         #------------------------------------------
         cyl = vtkCylinderSource()
         cyl.CappingOff()
@@ -885,7 +887,7 @@ class Vis(QWidget):
         self.cyl_actor.GetProperty().SetRepresentationToWireframe()
 
         self.ren.AddActor(self.cyl_actor)
-        self.ren.AddActor(self.actor)
+        # self.ren.AddActor(self.actor)
         # renderer.SetBackground(colors.GetColor3d('SlateGray'))  # Background Slate Gray
 
     # renderWindow.SetWindowName('PhysiCell model')
