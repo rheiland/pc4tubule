@@ -14,7 +14,7 @@
 	</domain>
 	<overall>
 		<max_time
-			units="min">120</max_time>
+			units="min">20</max_time>
 		<time_units>min</time_units>
 		<space_units>micron</space_units>
 		<dt_diffusion units="min">0.01</dt_diffusion>
@@ -29,12 +29,12 @@
 		<full_data>
 			<interval
 				units="min">5</interval>
-			<enable>false</enable>
+			<enable>true</enable>
 		</full_data>
 		<SVG>
 			<interval
 				units="min">5</interval>
-			<enable>true</enable>
+			<enable>false</enable>
 		</SVG>
 		<legacy_data>
 			<enable>false</enable>
@@ -251,11 +251,9 @@
 		</cell_definition>
 	</cell_definitions>
 	<initial_conditions>
-		<cell_positions
-			enabled="true"
-			type="csv">
-			<folder>./config</folder>
-			<filename>unittest_data.csv</filename>
+		<cell_positions enabled="true" type="csv">
+            <folder>./data</folder>
+            <filename>cyl1.csv</filename>
 		</cell_positions>
 	</initial_conditions>
 	<user_parameters>
