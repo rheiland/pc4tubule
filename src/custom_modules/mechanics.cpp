@@ -21,6 +21,7 @@ void parietal_epithelial_mechanics( Cell* pCell, Phenotype& phenotype, double dt
 
     double xpos = pCell->position[0];
     double ypos = pCell->position[1];
+    double zpos = pCell->position[2];
 
     if (pCell->custom_data[idx_attached] == 0.0)  // not attached (custom_data are double (or std::string))
     {
@@ -83,13 +84,13 @@ void parietal_epithelial_mechanics( Cell* pCell, Phenotype& phenotype, double dt
     
     std::vector<double> dvec; 
     dvec.resize(3,0.0); 
-    dvec[0] = 0.0; 
-    if (ypos > 0.0)
-        dvec[1] = -1.0; 
+    // dvec[0] = 0.0; 
+    // dvec[1] = 0.0;
+    if (zpos > 0.0)
+        dvec[2] = -1.0; 
     else
-        dvec[1] = 1.0;   // flip normal if on the other side of the membrane
+        dvec[2] = 1.0;   // flip normal if on the other side of the membrane
 
-    dvec[2] = 0.0; //  assuming 2D model
     
     // if the update_bias_vector function is set, use it  
     if( pCell->functions.update_migration_bias )
