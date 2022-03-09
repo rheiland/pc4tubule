@@ -10,11 +10,11 @@
 		<dx>20</dx>
 		<dy>20</dy>
 		<dz>20</dz>
-		<use_2D>true</use_2D>
+		<use_2D>false</use_2D>
 	</domain>
 	<overall>
 		<max_time
-			units="min">20</max_time>
+			units="min">300</max_time>
 		<time_units>min</time_units>
 		<space_units>micron</space_units>
 		<dt_diffusion units="min">0.01</dt_diffusion>
@@ -28,7 +28,7 @@
 		<folder>.</folder>
 		<full_data>
 			<interval
-				units="min">5</interval>
+				units="min">30</interval>
 			<enable>true</enable>
 		</full_data>
 		<SVG>
@@ -95,7 +95,7 @@
 	</microenvironment_setup>
 	<cell_definitions>
 		<cell_definition
-			name="parietal_basement_membrane_subcell"
+			name="parietal_epithelial"
 			ID="0">
 			<phenotype>
 				<cycle
@@ -208,7 +208,7 @@
 					<options>
 						<enabled>true</enabled>
 						<enabled>false</enabled>
-						<use_2D>true</use_2D>
+						<use_2D>false</use_2D>
 						<chemotaxis>
 							<enabled>false</enabled>
 							<substrate>oxygen</substrate>
@@ -252,8 +252,8 @@
 	</cell_definitions>
 	<initial_conditions>
 		<cell_positions enabled="true" type="csv">
-            <folder>./data</folder>
-            <filename>cyl1.csv</filename>
+            <folder></folder>
+            <filename>cells.csv</filename>
 		</cell_positions>
 	</initial_conditions>
 	<user_parameters>

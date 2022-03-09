@@ -66,9 +66,23 @@
 */
 
 #include "./custom.h"
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <unistd.h>
+#include <cstdlib>
 
-// std::vector<std::vector<double>> pbmSDF;
-// std::vector<std::vector<double>> normalVector;
+// double pbm_grad_x[75][88];
+// double pbm_grad_y[75][88];
+
+// static constexpr int NXG=88;
+// static constexpr int NYG=75;
+static constexpr int NXG=875;
+static constexpr int NYG=750;
+double pbm_grad_x[NYG][NXG];
+double pbm_grad_y[NYG][NXG];
+
 
 void create_cell_types( void )
 {
@@ -86,13 +100,14 @@ void create_cell_types( void )
 	cell_defaults.phenotype.secretion.sync_to_microenvironment( &microenvironment ); 
 	
 	cell_defaults.functions.volume_update_function = basic_volume_model; // standard_volume_update_function;
-	cell_defaults.functions.update_velocity = standard_update_cell_velocity;
-	// cell_defaults.functions.update_velocity = heterotypic_update_cell_velocity;
+//	cell_defaults.functions.update_velocity = standard_update_cell_velocity;
+	cell_defaults.functions.update_velocity = heterotypic_update_cell_velocity;
 
 	cell_defaults.functions.update_migration_bias = NULL; 
 	cell_defaults.functions.update_phenotype = NULL; // update_cell_and_death_parameters_O2_based; 
-	// cell_defaults.functions.custom_cell_rule = plasto_elastic_mechanics; // NULL; 
-	cell_defaults.functions.custom_cell_rule = NULL;
+	// cell_defaults.functions.custom_cell_rule = plasto_elastic_mechanics; 
+	// cell_defaults.functions.custom_cell_rule = epithelial_special_mechanics; 
+	cell_defaults.functions.custom_cell_rule = NULL; 
 	cell_defaults.functions.contact_function = NULL; 
 	
 	cell_defaults.functions.add_cell_basement_membrane_interactions = NULL; 
@@ -118,6 +133,12 @@ void create_cell_types( void )
 	cell_defaults.functions.update_phenotype = phenotype_function; 
 	cell_defaults.functions.custom_cell_rule = custom_function; 
 	cell_defaults.functions.contact_function = contact_function; 
+
+    Cell_Definition* pCD; 
+    pCD = find_cell_definition("parietal_epithelial"); 
+	pCD->functions.custom_cell_rule = parietal_epithelial_mechanics; 
+    // pCD = find_cell_definition("mesangial_matrix"); 
+	// pCD->functions.custom_cell_rule = mesangial_matrix_mechanics; 
 	
 	/*
 	   This builds the map of cell definitions and summarizes the setup. 
@@ -125,40 +146,313 @@ void create_cell_types( void )
 		
 	build_cell_definitions_maps(); 
 	display_cell_definitions( std::cout ); 
-
-
-
-
-	// // spring attachment changes
-	cell_defaults.phenotype.mechanics.attachment_elastic_constant = parameters.doubles( "elastic_coefficient" );
 	
-
-	// Cell_Definition* pCD = find_cell_definition( "mesangial_matrix_subcell" ); 
-	Cell_Definition* pCD = find_cell_definition( "parietal_basement_membrane_subcell" ); 
-	// pCD->functions.update_phenotype = pheno_update; 
-	// // pCD->functions.custom_cell_rule = NULL; // extra_elastic_attachment_mechanics;  // pre-1.8.0
-	// pCD->functions.custom_cell_rule = custom_cell_update;   // dt_mechanics
-	pCD->functions.custom_cell_rule = epithelial_special_mechanics;   // dt_mechanics
-	// pCD->functions.contact_function = standard_elastic_contact_function; 
-	// // pCD->functions.update_migration_bias = worker_cell_motility;
-	// pCD->phenotype.mechanics.attachment_elastic_constant = parameters.doubles( "elastic_const" );
-
-
 	return; 
+}
+
+void read_pbm_membrane_gradient_data( void )
+{
+    std::ifstream grad_file;
+    std::string line;
+
+    double dval;
+    int n = 0;
+    float vmin = 1.e6;
+    float vmax = -1.e6;
+    float v;
+
+    int idy = 0;
+    int idx = 0;
+
+    // std::string fname1 = "./config/grad_x_pbm_875x750.dat";
+    // std::string fname2 = "./config/grad_y_pbm_875x750.dat";
+
+    // std::string fname1 = "../data/grad_x_pbm_875x750.dat";   // on nanoHUB, use ".."
+    // std::string fname2 = "../data/grad_y_pbm_875x750.dat";
+
+    const char* env_p = std::getenv("KIDNEY_DATA_PATH");
+    std::cout << "       read_pbm_membrane_gradient_data(): KIDNEY_DATA_PATH: " << env_p << std::endl;
+    // std::string full_filename = cwd_string + "/../" + filename;   // bloody nanoHUB
+    // std::string full_filename = env_p + filename;
+    std::string tmpname = "/grad_x_pbm_875x750.dat";   
+    std::string fname1 = env_p + tmpname;
+
+    tmpname = "/grad_y_pbm_875x750.dat";   
+    std::string fname2 = env_p + tmpname;
+
+    try {
+        std::cout << " ---- Reading " << fname1 << std::endl;
+        // grad_file.open("./config/grad_x_pbm.dat");
+        grad_file.open(fname1);
+
+        while (std::getline(grad_file,line))
+        {
+            // std::cout << "-- " << count1 << std::endl;
+            // count1++;
+            std::istringstream s(line);
+            std::string field;
+            // if (count1 > 5) break;
+            idx = 0;
+            while (std::getline(s,field,' ')) // beware, not comma separated!
+            {
+                // std::cout << count2 << ": " << field << std::endl;
+                v = std::stof(field);
+                if (v < vmin) vmin = v;
+                if (v > vmax) vmax = v;
+                pbm_grad_x[idy][idx] = v;
+                n++;
+                // count2++;
+                // if (count2 > 5) break;
+                idx += 1;
+            }
+            idy += 1;
+        }
+        std::cout << "-------- grad_x vmin,vmax= " << vmin << ", "  << vmax << std::endl;
+    }
+    catch (const std::ifstream::failure& e) {
+      std::cout << ">>>>>>> Exception opening/reading " << fname1 << std::endl;
+    }
+
+    grad_file.close();
+
+    try {
+        std::cout << " ---- Reading " << fname2 << std::endl;
+        // grad_file.open("./config/grad_x_pbm.dat");
+        grad_file.open(fname2);
+        idx = 0;
+        idy = 0;
+        while (std::getline(grad_file,line))
+        {
+            // std::cout << "-- " << count1 << std::endl;
+            // count1++;
+            std::istringstream s(line);
+            std::string field;
+            // if (count1 > 5) break;
+            idx = 0;
+            while (std::getline(s,field,' '))   // beware, not comma separated!
+            {
+                // std::cout << count2 << ": " << field << std::endl;
+                v = std::stof(field);
+                if (v < vmin) vmin = v;
+                if (v > vmax) vmax = v;
+                pbm_grad_y[idy][idx] = v;
+                n++;
+                // count2++;
+                // if (count2 > 5) break;
+                idx += 1;
+            }
+            idy += 1;
+        }
+        std::cout << "-------- grad_y vmin,vmax= " << vmin << ", "  << vmax << std::endl;
+    }
+    catch (const std::ifstream::failure& e) {
+      std::cout << ">>>>>>> Exception opening/reading " << fname2 << std::endl;
+    }
+
+    // std::exit(1);
+
+}
+
+void read_membrane_distance_data( void )
+{
+    //---------------------------------
+    // read glom BM distances (signed?)
+	int gbm_index = microenvironment.find_density_index( "pbm_gbm_distance" ); 
+    std::cout << "\n---------- gbm_index = " << gbm_index << std::endl;
+
+    const char* env_p = std::getenv("KIDNEY_DATA_PATH");
+    std::cout << "       read_membrane_distance_data(): KIDNEY_DATA_PATH: " << env_p << std::endl;
+    std::string tmpname = "/pbm_gbm_dist.dat";   
+    std::string fname1 = env_p + tmpname;
+
+    tmpname = "/vessels4_dist.dat";   
+    std::string fname2 = env_p + tmpname;
+
+
+    // for( int n=0; n < microenvironment.number_of_voxels(); n++ )
+    std::ifstream gbm_file;
+    std::string line;
+    try {
+        // gbm_file.open("./data/pbm_gbm_dist.dat");
+        gbm_file.open(fname1);
+
+        double dval;
+        int n = 0;
+        float vmin = 1.e6;
+        float vmax = -1.e6;
+        float v;
+
+        while (std::getline(gbm_file,line))
+        {
+            // std::cout << "-- " << count1 << std::endl;
+            // count1++;
+            std::istringstream s(line);
+            std::string field;
+            // if (count1 > 5) break;
+            while (std::getline(s,field,','))
+            {
+                // std::cout << count2 << ": " << field << std::endl;
+                v = std::stof(field);
+                if (v < vmin) vmin = v;
+                if (v > vmax) vmax = v;
+                microenvironment(n)[gbm_index] = v;
+                n++;
+                // count2++;
+                // if (count2 > 5) break;
+            }
+        }
+        std::cout << "-------- vmin,vmax= " << vmin << ", "  << vmax << std::endl;
+    }
+    catch (const std::ifstream::failure& e) {
+      std::cout << "Exception opening/reading file";
+    }
+
+    //---------------------------------
+    // read glom capillary (4 blood vessel regions) distances (signed)
+	int gcap_index = microenvironment.find_density_index( "blood_vessel_distance" ); 
+    std::cout << "\n---------- gcap_index = " << gcap_index << std::endl;
+
+    std::ifstream gcap_file;
+    try {
+        // gcap_file.open("./data/vessels4_dist.dat");
+        gcap_file.open(fname2);
+
+        double dval;
+        int n = 0;
+        float vmin = 1.e6;
+        float vmax = -1.e6;
+        float v;
+
+        while (std::getline(gcap_file,line))
+        {
+            // std::cout << "-- " << count1 << std::endl;
+            // count1++;
+            std::istringstream s(line);
+            std::string field;
+            // if (count1 > 5) break;
+            while (std::getline(s,field,','))
+            {
+                // std::cout << count2 << ": " << field << std::endl;
+                v = std::stof(field);
+                if (v < vmin) vmin = v;
+                if (v > vmax) vmax = v;
+                microenvironment(n)[gcap_index] = v;
+                n++;
+                // count2++;
+                // if (count2 > 5) break;
+            }
+        }
+        std::cout << "-------- vmin,vmax= " << vmin << ", "  << vmax << std::endl;
+    }
+    catch (const std::ifstream::failure& e) {
+      std::cout << "Exception opening/reading file";
+    }
+
 }
 
 void setup_microenvironment( void )
 {
-	// set domain parameters 
-	
-	// put any custom code to set non-homogeneous initial conditions or 
-	// extra Dirichlet nodes here. 
-	
-	// initialize BioFVM 
-	
-	initialize_microenvironment(); 	
-	
-	return; 
+    // static std::string pbm_gbm_dist_file = parameters.strings( "pbm_gbm_distance_file" ); 
+    // static std::string vessels_dist_file = parameters.strings( "vessels_distance_file" ); 
+
+    // std::cout << "\n---------- setup_microenvironment(): dist1 file " << pbm_gbm_dist_file << std::endl;
+    // std::cout << "\n---------- setup_microenvironment(): dist2 file" << vessels_dist_file << std::endl;
+
+    // set domain parameters 
+
+    // put any custom code to set non-homogeneous initial conditions or 
+    // extra Dirichlet nodes here. 
+
+    // initialize BioFVM 
+
+    initialize_microenvironment();
+
+    //---------------------------------
+    // read glom BM distances (signed)
+	// int pbm_gbm_index = microenvironment.find_density_index( "pbm_gbm_distance" ); 
+    // std::cout << "\n---------- pbm_gbm_index = " << pbm_gbm_index << std::endl;
+
+    // // for( int n=0; n < microenvironment.number_of_voxels(); n++ )
+    // std::ifstream pbm_gbm_fp;
+    // std::string line;
+    // try {
+    //     // gbm_file.open("../data/pbm_gbm_dist.dat");
+    //     // gbm_file.open(parameters.strings("pbm_gbm_distance_file"));
+    //     pbm_gbm_fp.open(pbm_gbm_dist_file);
+
+    //     double dval;
+    //     int n = 0;
+    //     float vmin = 1.e6;
+    //     float vmax = -1.e6;
+    //     float v;
+
+    //     while (std::getline(pbm_gbm_fp,line))
+    //     {
+    //         // std::cout << "-- " << count1 << std::endl;
+    //         // count1++;
+    //         std::istringstream s(line);
+    //         std::string field;
+    //         // if (count1 > 5) break;
+    //         while (std::getline(s,field,','))
+    //         {
+    //             // std::cout << count2 << ": " << field << std::endl;
+    //             v = std::stof(field);
+    //             if (v < vmin) vmin = v;
+    //             if (v > vmax) vmax = v;
+    //             microenvironment(n)[pbm_gbm_index] = v;
+    //             n++;
+    //             // count2++;
+    //             // if (count2 > 5) break;
+    //         }
+    //     }
+    //     std::cout << "-------- vmin,vmax= " << vmin << ", "  << vmax << std::endl;
+    // }
+    // catch (const std::ifstream::failure& e) {
+    //   std::cout << "Exception opening/reading file";
+    // }
+
+    // //---------------------------------
+    // // read glom capillary (4 blood vessel regions) distances (signed)
+	// int vessel_index = microenvironment.find_density_index( "blood_vessel_distance" ); 
+    // std::cout << "\n---------- vessel_index = " << vessel_index << std::endl;
+
+    // std::ifstream vessel_dist_fp;
+    // try {
+    //     // gcap_file.open("../data/vessels4_dist.dat");
+    //     vessel_dist_fp.open(vessels_dist_file);
+
+    //     double dval;
+    //     int n = 0;
+    //     float vmin = 1.e6;
+    //     float vmax = -1.e6;
+    //     float v;
+
+    //     while (std::getline(vessel_dist_fp,line))
+    //     {
+    //         // std::cout << "-- " << count1 << std::endl;
+    //         // count1++;
+    //         std::istringstream s(line);
+    //         std::string field;
+    //         // if (count1 > 5) break;
+    //         while (std::getline(s,field,','))
+    //         {
+    //             // std::cout << count2 << ": " << field << std::endl;
+    //             v = std::stof(field);
+    //             if (v < vmin) vmin = v;
+    //             if (v > vmax) vmax = v;
+    //             microenvironment(n)[vessel_index] = v;
+    //             n++;
+    //             // count2++;
+    //             // if (count2 > 5) break;
+    //         }
+    //     }
+    //     std::cout << "-------- vmin,vmax= " << vmin << ", "  << vmax << std::endl;
+    // }
+    // catch (const std::ifstream::failure& e) {
+    //   std::cout << "Exception opening/reading file";
+    // }
+
+    return; 
 }
 
 void setup_tissue( void )
@@ -185,25 +479,30 @@ void setup_tissue( void )
 	
 	Cell* pC;
 	
-	for( int k=0; k < cell_definitions_by_index.size() ; k++ )
-	{
-		Cell_Definition* pCD = cell_definitions_by_index[k]; 
-		std::cout << "Placing cells of type " << pCD->name << " ... " << std::endl; 
-		for( int n = 0 ; n < parameters.ints("number_of_cells") ; n++ )
-		{
-			std::vector<double> position = {0,0,0}; 
-			position[0] = Xmin + UniformRandom()*Xrange; 
-			position[1] = Ymin + UniformRandom()*Yrange; 
-			position[2] = Zmin + UniformRandom()*Zrange; 
+	// for( int k=0; k < cell_definitions_by_index.size() ; k++ )
+	// {
+	// 	Cell_Definition* pCD = cell_definitions_by_index[k]; 
+	// 	std::cout << "Placing cells of type " << pCD->name << " ... " << std::endl; 
+	// 	for( int n = 0 ; n < parameters.ints("number_of_cells") ; n++ )
+	// 	{
+	// 		std::vector<double> position = {0,0,0}; 
+	// 		position[0] = Xmin + UniformRandom()*Xrange; 
+	// 		position[1] = Ymin + UniformRandom()*Yrange; 
+	// 		position[2] = Zmin + UniformRandom()*Zrange; 
 			
-			pC = create_cell( *pCD ); 
-			pC->assign_position( position );
-		}
-	}
+	// 		pC = create_cell( *pCD ); 
+	// 		pC->assign_position( position );
+	// 	}
+	// }
 	std::cout << std::endl; 
 	
 	// load cells from your CSV file (if enabled)
-	load_subcells_from_pugixml(); 	
+    if (load_subcells_from_pugixml() == false)
+    {
+        std::cout << "NOTE: ------- <cell_positions> in .xml are NOT enabled" << std::endl;
+        return;
+    }
+	
 
 	// more custom setup 
 	// // for each cell, set its relaxed position to current position 
@@ -292,114 +591,38 @@ bool load_subcells_from_pugixml( pugi::xml_node root )
 	return false; 
 }
 
-
-
-std::tuple<double, double, double> get_minimum_distance(int x_grid, int y_grid, std::vector<std::tuple<double,double>> endothelial_subcell_coordinates)
-{
-	double min_value = INT64_MAX;
-	double x_closest = 0.0;
-	double y_closest = 0.0;
-	for (int i=0; i < endothelial_subcell_coordinates.size(); i++)
-	{
-		double distance = sqrt(pow(x_grid - std::get<0>(endothelial_subcell_coordinates.at(i)), 2) + pow(y_grid - std::get<1>(endothelial_subcell_coordinates.at(i)), 2));
-		if (distance < min_value){
-			min_value = distance;
-			x_closest = std::get<0>(endothelial_subcell_coordinates.at(i));
-			y_closest = std::get<1>(endothelial_subcell_coordinates.at(i));
-		}
-	}
-	std::tuple<double, double, double> closest_membrane_point = {x_closest, y_closest, min_value};
-	return closest_membrane_point;
-
-}
-
-// void loadPBMCSV(std::string filename) {
-
-// 	std::ifstream file( filename, std::ios::in );
-// 	if( !file )
-// 	{ 
-// 		std::cout << "Error: " << filename << " not found during cell loading. Quitting." << std::endl; 
-// 		exit(-1);
-// 	}
-// 	std::string line;
-// 	while (std::getline(file, line))
-// 	{
-// 		std::vector<double> data;
-// 		csv_to_vector( line.c_str() , data ); 
-
-// 		pbmSDF.push_back(data);
-// 	}
-// }
-
-
-// void loadNormalVector(std::string filename) {
-
-// 	std::ifstream file( filename, std::ios::in );
-// 	if( !file )
-// 	{ 
-// 		std::cout << "Error: " << filename << " not found during cell loading. Quitting." << std::endl; 
-// 		exit(-1);
-// 	}
-// 	std::string line;
-// 	while (std::getline(file, line))
-// 	{
-// 		std::vector<double> data;
-// 		csv_to_vector( line.c_str() , data ); 
-
-// 		if( data.size() != 2 )
-// 		{
-// 			std::cout << "Error! Importing subcells from a CSV file expects each row to be x and y." << std::endl;
-// 			exit(-1);
-// 		}
-
-// 		normalVector.push_back(data);
-// 	}
-// }
-
-// void add_sdf_substrate()
-// {
-
-// 	int pbmIndex = microenvironment.find_density_index("pbm");
-// 	int n_x_index = microenvironment.find_density_index("n_x");
-// 	int n_y_index = microenvironment.find_density_index("n_y");
-
-// 	for (int i=0; i < microenvironment.mesh.x_coordinates.size(); i++)
-// 	{
-// 		for (int j=0; j < microenvironment.mesh.y_coordinates.size(); j++)
-// 		{
-// 			// std::cout << "voxel index " << microenvironment.voxel_index(i, j, 0) << std::endl;
-// 			double sdfValue = pbmSDF.at(i).at(j);
-// 			microenvironment.nearest_density_vector(microenvironment.voxel_index(i, j, 0)).at(pbmIndex) = sdfValue;
-// 			// microenvironment.density_vector(i, j, 0).at(pbmIndex) = sdfValue;
-	
-			
-// 			double n_x_value = normalVector.at(i*microenvironment.mesh.y_coordinates.size() + j).at(0);
-// 			// double n_x_value = normalVector.at(j*microenvironment.mesh.y_coordinates.size() + i).at(0);
-// 			// microenvironment.density_vector(i, j, 0).at(n_x_index) = n_x_value;
-// 			microenvironment.nearest_density_vector(microenvironment.voxel_index(i, j, 0)).at(n_x_index) = n_x_value;
-
-// 			double n_y_value = normalVector.at(i*microenvironment.mesh.y_coordinates.size() + j).at(1);
-// 			// double n_y_value = normalVector.at(j*microenvironment.mesh.y_coordinates.size() + i).at(1);
-// 			// microenvironment.density_vector(i, j, 0).at(n_y_index) = n_y_value;
-// 			microenvironment.nearest_density_vector(microenvironment.voxel_index(i, j, 0)).at(n_y_index) = n_y_value;
-
-// 		}
-// 	}
-
-// }
-
 void load_subcells_csv( std::string filename )
 {
-	std::ifstream file( filename, std::ios::in );
+    char tmp[256];
+    getcwd(tmp, 256);
+    std::cout << "custom.cpp: load_subcells_csv(): Current working directory: " << tmp << std::endl;
+    std::cout << "custom.cpp: load_subcells_csv(): (param) filename= " << filename << std::endl;
+    std::string cwd_string = tmp;   
+    // if(const char* env_p = std::getenv("KIDNEY_DATA_PATH"))
+    const char* env_p = std::getenv("KIDNEY_DATA_PATH");
+    std::cout << "        KIDNEY_DATA_PATH: " << env_p << std::endl;
+    // std::string full_filename = cwd_string + "/../" + filename;   // bloody nanoHUB
+    // std::string full_filename = env_p + filename;
+    // std::string tmpname = "/cells.csv";  //rwh: NO! 
+    // std::string full_filename = env_p + tmpname;
+    // std::string sep_str = "/";
+    std::string full_filename = env_p + filename;
+    std::cout << "custom.cpp: load_subcells_csv(): full_filename= " << full_filename << std::endl;
+
+
+	// std::ifstream file( filename, std::ios::in );
+	std::ifstream file( full_filename, std::ios::in );
 	if( !file )
 	{ 
-		std::cout << "Error: " << filename << " not found during cell loading. Quitting." << std::endl; 
+		// std::cout << "Error: " << filename << " not found during cell loading. Quitting." << std::endl; 
+		std::cout << "Error: " << full_filename << " not found during cell loading. Quitting." << std::endl; 
 		exit(-1);
 	}
-	std::cout << "filename is : " << filename << std::endl;
+	
 	static int nCellID = cell_defaults.custom_data.find_variable_index( "cell_ID" ); 
 
 	std::string line;
+    int prev_type = -1;
 	while (std::getline(file, line))
 	{
 		std::vector<double> data;
@@ -414,43 +637,32 @@ void load_subcells_csv( std::string filename )
 		std::vector<double> position = { data[0] , data[1] , data[2] };
 
 		int my_type = (int) data[3]; 
-		int my_ID = (int) data[4];
+		int my_ID = (int) data[4]; 
 		Cell_Definition* pCD = find_cell_definition( my_type );
-		if( pCD != NULL and my_type != 12)
+		if( pCD != NULL )
 		{
-			std::cout << "Creating " << pCD->name << " (type=" << pCD->type << ") at " << position << std::endl; 
+            if (pCD->type != prev_type)
+            {
+                std::cout << "Creating " << pCD->name << " (type=" << pCD->type << ") at " 
+                    << position << std::endl; 
+                prev_type = pCD->type;
+            }
 			Cell* pCell = create_cell( *pCD ); 
 			pCell->assign_position( position ); 
 			
 			pCell->custom_data[nCellID] = my_ID; 
 		}
+		else
+		{
+			std::cout << "Warning! No cell definition found for index " << my_type << "!" << std::endl
+			<< "\tIgnoring cell in " << full_filename << " at position " << position << std::endl; 
+//			<< "\tIgnoring cell in " << filename << " at position " << position << std::endl; 
+		}
 
 	}
 
 	file.close(); 	
-	// loadPBMCSV("./config/sdf.csv");
-	// loadNormalVector("./config/normal_data.csv");
-	// add_sdf_substrate();
 }
-
-void pheno_update( Cell* pCell , Phenotype& phenotype , double dt )
-{
-	// return; 
-	std::vector<Cell*> nearby = pCell->cells_in_my_container(); 
-	
-	// if at least 2 neighbors, turn off secretion 
-		// if size >= 3, then we have "self" and at least two more 
-	if( nearby.size() > 2 )
-	{
-		pCell->phenotype.secretion.set_all_secretion_to_zero(); 
-		pCell->custom_data[ "secreting" ] = 0.0; 
-		
-		pCell->functions.update_phenotype = NULL; 
-	}
-	
-	return; 
-}
-
 
 bool load_subcells_from_pugixml( void )
 { return load_subcells_from_pugixml( physicell_config_root ); }

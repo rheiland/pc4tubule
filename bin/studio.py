@@ -108,7 +108,8 @@ class PhysiCellXMLCreator(QWidget):
 
 
         # NOTE! We create a *copy* of the .xml sample model and will save to it.
-        copy_file = "copy_" + model_name + ".xml"
+        # copy_file = "copy_" + model_name + ".xml"
+        copy_file = "config.xml"
         shutil.copy(read_file, copy_file)
         if self.nanohub_flag:
             # self.setWindowTitle(self.title_prefix + "pc4learning")
@@ -215,8 +216,8 @@ class PhysiCellXMLCreator(QWidget):
             # self.vis_tab.xml_root = self.xml_root
             tabWidget.addTab(self.vis_tab,"Plot")
             self.run_tab.vis_tab = self.vis_tab
-            print("studio.py: calling vis_tab.substrates_cbox_changed_cb(2)")
-            self.vis_tab.fill_substrates_combobox(self.celldef_tab.substrate_list)
+            # print("studio.py: calling vis_tab.substrates_cbox_changed_cb(2)")
+            # self.vis_tab.fill_substrates_combobox(self.celldef_tab.substrate_list)
             # self.vis_tab.substrates_cbox_changed_cb(2)   # doesn't accomplish it; need to set index, but not sure when
             self.vis_tab.init_plot_range(self.config_tab)
 

@@ -1,3 +1,4 @@
+# python cells_cylinder.py 100 8 >cyl1.csv
 import sys
 import numpy as np
 from matplotlib.patches import Circle, Ellipse, Rectangle

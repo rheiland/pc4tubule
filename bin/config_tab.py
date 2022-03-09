@@ -162,8 +162,8 @@ class Config(QWidget):
         hbox.addWidget(self.virtual_walls)
 
         self.model_3D = QCheckBox("3D model")
+        self.model_3D.setEnabled(True)
         self.model_3D.setChecked(True)
-        self.model_3D.setEnabled(False)
         hbox.addWidget(self.model_3D)
 
         self.vbox.addLayout(hbox)
@@ -296,7 +296,7 @@ class Config(QWidget):
         self.full_interval = QLineEdit()
         self.full_interval.setFixedWidth(value_width)
         self.full_interval.setValidator(QtGui.QDoubleValidator())
-        self.full_interval.setEnabled(False)
+        self.full_interval.setEnabled(True)
         hbox.addWidget(self.full_interval)
 
         label = QLabel("min")
@@ -478,8 +478,8 @@ class Config(QWidget):
             self.xml_root.find(".//full_data//enable").text = 'true'
         else:
             self.xml_root.find(".//full_data//enable").text = 'false'
-        # self.xml_root.find(".//full_data//interval").text = self.full_interval.text()
-        self.xml_root.find(".//full_data//interval").text = self.svg_interval.text()
+        self.xml_root.find(".//full_data//interval").text = self.full_interval.text()
+        # self.xml_root.find(".//full_data//interval").text = self.svg_interval.text()
 
         if self.cells_csv.isChecked():
             self.xml_root.find(".//initial_conditions//cell_positions").attrib['enabled'] = 'true'
@@ -488,7 +488,7 @@ class Config(QWidget):
 
         self.xml_root.find(".//initial_conditions//cell_positions").attrib['enabled'] = 'true'
 
-        self.xml_root.find(".//initial_conditions//cell_positions/folder").text = ''
+        # self.xml_root.find(".//initial_conditions//cell_positions/folder").text = ''
         # if self.csv_rb1.isChecked():
         #     self.xml_root.find(".//initial_conditions//cell_positions/filename").text = 'all_cells.csv'
         # else:

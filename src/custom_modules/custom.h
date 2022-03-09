@@ -71,29 +71,6 @@
 #include "./mechanics.h"
 
 using namespace BioFVM; 
-// namespace PhysiCell
-// {
-//     class Cylinder
-// {
-//     public:
-//     std::vector<double> vertices;
-//     double id;
-//     double type;
-// };
-
-// class Cylinder_Container
-// {
-//     public:
-//         void add_cylinder(Cylinder* cylinder);
-
-// };
-
-// };
-
-namespace PhysiCell {
-extern std::vector<std::vector<std::tuple<double, double, double>>> distance_function;
-}
-
 using namespace PhysiCell;
 
 // setup functions to help us along 
@@ -103,6 +80,8 @@ void setup_tissue( void );
 
 // set up the BioFVM microenvironment 
 void setup_microenvironment( void ); 
+void read_membrane_distance_data( void );
+void read_pbm_membrane_gradient_data( void );
 
 // custom pathology coloring function 
 
@@ -120,16 +99,9 @@ void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& 
 // reading subcells 
 
 void load_subcells_csv( std::string filename ); 
-void load_endothelial_points_csv(std::string filename);
 bool load_subcells_from_pugixml( pugi::xml_node root ); 
 bool load_subcells_from_pugixml( void ); 
 
 // plots 
 std::vector<std::string> paint_by_number_cell_coloring_wrapped( Cell* pCell ); 
-
-
-void pheno_update( Cell* pCell, Phenotype& phenotype, double dt ); 
-void custom_cell_update( Cell* pCell, Phenotype& phenotype, double dt ); 
-
-// Linkage* create_link(std::tuple<double, double> position);
 

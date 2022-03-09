@@ -10,7 +10,7 @@
 		<dx>20</dx>
 		<dy>20</dy>
 		<dz>20</dz>
-		<use_2D>true</use_2D>
+		<use_2D>false</use_2D>
 	</domain>
 	<overall>
 		<max_time
@@ -211,7 +211,7 @@
 					<options>
 						<enabled>true</enabled>
 						<enabled>false</enabled>
-						<use_2D>true</use_2D>
+						<use_2D>false</use_2D>
 						<chemotaxis>
 							<enabled>false</enabled>
 							<substrate>oxygen</substrate>

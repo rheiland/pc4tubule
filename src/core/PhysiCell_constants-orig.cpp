@@ -65,54 +65,51 @@
 ###############################################################################
 */
 
-#include "../core/PhysiCell.h"
-#include "../modules/PhysiCell_standard_modules.h" 
+#include "PhysiCell_constants.h" 
 
-using namespace BioFVM; 
-using namespace PhysiCell;
+namespace PhysiCell{
 
-// custom cell phenotype function to scale immunostimulatory factor with hypoxia 
-void tumor_cell_phenotype_with_and_immune_stimulation( Cell* pCell, Phenotype& phenotype, double dt ); 
+std::string time_units = "min";
+std::string space_units = "micron";
+double diffusion_dt = 0.01; 
+double mechanics_dt = 0.1;
+double phenotype_dt = 6.0;
+double intracellular_dt = 0.01;
 
-extern Cell_Definition* pImmuneCell; 
+std::unordered_map<std::string,int> cycle_model_codes = 
+{
+	{ "Ki67 (advanced)", PhysiCell_constants::advanced_Ki67_cycle_model}, 
+	{ "Ki67 (basic)" ,PhysiCell_constants::basic_Ki67_cycle_model},
+	{ "Flow cytometry model (basic)",PhysiCell_constants::flow_cytometry_cycle_model},
+	// { ,PhysiCell_constants::live_apoptotic_cycle_model}, // not implemented 
+	// { ,PhysiCell_constants::total_cells_cycle_model}, // not implemented 
+	{ "Live",PhysiCell_constants::live_cells_cycle_model}, 
+	{ "Flow cytometry model (separated)",PhysiCell_constants::flow_cytometry_separated_cycle_model}, 
+	{ "Cycling-Quiescent model",PhysiCell_constants::cycling_quiescent_model}, 
+	
+	// currently recognized death models 
+	{ "Apoptosis",PhysiCell_constants::apoptosis_death_model}, 
+	{ "Necrosis",PhysiCell_constants::necrosis_death_model} , 
+	// { ,PhysiCell_constants::autophagy_death_model}, // not implemented 
+	
+	{ "ki67 (advanced)", PhysiCell_constants::advanced_Ki67_cycle_model}, 
+	{ "ki67 (basic)" ,PhysiCell_constants::basic_Ki67_cycle_model},
+	{ "flow cytometry model (basic)",PhysiCell_constants::flow_cytometry_cycle_model},
+	{ "live",PhysiCell_constants::live_cells_cycle_model}, 
+	{ "flow cytometry model (separated)",PhysiCell_constants::flow_cytometry_separated_cycle_model}, 
+	{ "cycling-quiescent model",PhysiCell_constants::cycling_quiescent_model}, 
+	{ "apoptosis",PhysiCell_constants::apoptosis_death_model}, 
+	{ "necrosis",PhysiCell_constants::necrosis_death_model} 
+	
+}; 
 
-void create_immune_cell_type( void ); 
+int find_cycle_model_code( std::string model_name )
+{
+	auto search = cycle_model_codes.find( model_name );
+	if( search == cycle_model_codes.end() )
+	{ return -1; }
+	else
+	{ return search->second; }
+}
 
-// set the tumor cell properties, then call the function 
-// to set up the tumor cells 
-void create_cell_types( void );
-
-void setup_tissue(); 
-
-void introduce_immune_cells( void ); 
-
-// set up the microenvironment to include the immunostimulatory factor 
-void setup_microenvironment( void );   
-
-std::vector<std::string> cancer_immune_coloring_function( Cell* );
-
-// cell rules for extra elastic adhesion
-
-/*
-void attach_cells( Cell* pCell_1, Cell* pCell_2 );
-void dettach_cells( Cell* pCell_1 , Cell* pCell_2 );
-*/
-void add_elastic_velocity( Cell* pActingOn, Cell* pAttachedTo , double elastic_constant ); 
-void extra_elastic_attachment_mechanics( Cell* pCell, Phenotype& phenotype, double dt );
-
-// immune cell functions for attacking a cell 
-Cell* immune_cell_check_neighbors_for_attachment( Cell* pAttacker , double dt ); 
-bool immune_cell_attempt_attachment( Cell* pAttacker, Cell* pTarget , double dt ); // only attack if oncoprotein 
-bool immune_cell_attempt_apoptosis( Cell* pAttacker, Cell* pTarget, double dt ); 
-bool immune_cell_trigger_apoptosis( Cell* pAttacker, Cell* pTarget ); 
-
-void immune_cell_rule( Cell* pCell, Phenotype& phenotype, double dt ); 
-
-void immune_cell_attach( Cell* pAttacker, Cell* pTarget ); // use attach_cells?? 
-void immune_cell_dettach( Cell* pAttacker, Cell* pTarget ); // use dettach_cells ?? 
-
-void adhesion_contact_function( Cell* pActingOn, Phenotype& pao, Cell* pAttachedTo, Phenotype& pat , double dt );
-
-// immune cell functions for motility 
-
-void immune_cell_motility( Cell* pCell, Phenotype& phenotype, double dt ); 
+};

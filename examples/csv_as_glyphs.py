@@ -75,7 +75,12 @@ def main():
         # if idx < 5:
             # print(idx,cellID_color_dict[cell_type[idx]])
         # colors.InsertTuple3(idx, cellID_color_dict[cell_type[idx]][0], cellID_color_dict[cell_type[idx]][1], cellID_color_dict[cell_type[idx]][2])
-        colors.InsertTuple3(idx, 255, 0, 0)
+        if pts[idx,3] == 0:
+            colors.InsertTuple3(idx, 255, 0, 0)
+        elif pts[idx,3] == 1:
+            colors.InsertTuple3(idx, 0, 255, 0)
+        elif pts[idx,3] == 2:
+            colors.InsertTuple3(idx, 0, 255, 255)
 
     polydata.GetPointData().SetScalars(colors)
 
