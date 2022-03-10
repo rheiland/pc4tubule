@@ -207,7 +207,6 @@
 					<migration_bias>.5</migration_bias>
 					<options>
 						<enabled>true</enabled>
-						<enabled>false</enabled>
 						<use_2D>false</use_2D>
 						<chemotaxis>
 							<enabled>false</enabled>
