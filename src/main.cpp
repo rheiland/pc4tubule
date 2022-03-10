@@ -175,6 +175,7 @@ int main( int argc, char* argv[] )
 	
 	// main loop 
 	
+    Cell_Definition* pCD; 
 	try 
 	{		
 		while( PhysiCell_globals.current_time < PhysiCell_settings.max_time + 0.1*diffusion_dt )
@@ -193,6 +194,12 @@ int main( int argc, char* argv[] )
 					sprintf( filename , "%s/output%08u" , PhysiCell_settings.folder.c_str(),  PhysiCell_globals.full_output_index ); 
 					
 					save_PhysiCell_to_MultiCellDS_xml_pugi( filename , microenvironment , PhysiCell_globals.current_time ); 
+
+                    // pCD = find_cell_definition("parietal_epithelial"); 
+                    // std::cout << "\n\n----------create_cell_types(): motility_vector = " << pCD->phenotype.motility.motility_vector << std::endl;
+                    // std::cout << "----------create_cell_types(): migration_bias_direction = " << pCD->phenotype.motility.migration_bias_direction << std::endl;
+
+
 				}
 				
 				PhysiCell_globals.full_output_index++; 

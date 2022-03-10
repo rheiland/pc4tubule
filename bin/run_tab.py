@@ -128,10 +128,10 @@ class RunModel(QWidget):
             # remove any previous data
             # NOTE: this dir name needs to match the <folder>  in /data/<config_file.xml>
             os.system('rm -rf tmpdir*')
-            if os.path.isdir('tmpdir'):
-                # something on NFS causing issues...
-                tname = tempfile.mkdtemp(suffix='.bak', prefix='tmpdir_', dir='.')
-                shutil.move('tmpdir', tname)
+            # if os.path.isdir('tmpdir'):
+            #     # something on NFS causing issues...
+            #     tname = tempfile.mkdtemp(suffix='.bak', prefix='tmpdir_', dir='.')
+            #     shutil.move('tmpdir', tname)
             os.makedirs('tmpdir')
 
             # write the default config file to tmpdir

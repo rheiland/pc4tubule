@@ -585,6 +585,7 @@ class Vis(QWidget):
         # svg_files.sort()
         mat_files = glob.glob('output*_cells_physicell.mat')
         mat_files.sort()
+        print("mat_files: ",mat_files)
 
         print('xml_files = ',xml_files)
         num_xml = len(xml_files)
