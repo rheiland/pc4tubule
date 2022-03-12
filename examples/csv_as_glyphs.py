@@ -88,7 +88,8 @@ def main():
     nres = 20
     sphereSource.SetPhiResolution(nres)
     sphereSource.SetThetaResolution(nres)
-    sphereSource.SetRadius(0.1)
+    # sphereSource.SetRadius(0.1)
+    sphereSource.SetRadius(8.41)
 
     glyph = vtkGlyph3D()
     glyph.SetSourceConnection(sphereSource.GetOutputPort())
@@ -98,7 +99,7 @@ def main():
 
     # using these 2 results in fixed size spheres
     glyph.SetScaleModeToDataScalingOff()  # results in super tiny spheres without 'ScaleFactor'
-    glyph.SetScaleFactor(170)  # overall (multiplicative) scaling factor
+    # glyph.SetScaleFactor(170)  # overall (multiplicative) scaling factor
 
     # glyph.SetScaleModeToDataScalingOn()
     # glyph.ScalingOn()
